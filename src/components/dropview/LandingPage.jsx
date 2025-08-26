@@ -1,0 +1,278 @@
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
+import { ArrowRight, Package, MessageSquare, CheckCircle, Gift, Users, Star } from 'lucide-react';
+
+export function LandingPage() {
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="w-full px-6 py-6 flex justify-between items-center max-w-7xl mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] flex items-center justify-center">
+            <Gift className="h-4 w-4 text-white" />
+          </div>
+          <span className="font-display text-xl text-[#2d2d2d]">DropView</span>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="max-w-4xl mx-auto px-6 py-16 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="font-display text-5xl md:text-6xl text-[#2d2d2d] mb-6 leading-tight">
+            Get Free Products.<br />
+            Share Honest Reviews.<br />
+            <span className="text-transparent bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] bg-clip-text">
+              Shape the Future of Brands.
+            </span>
+          </h1>
+          
+          <p className="text-xl text-[#2d2d2d]/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Join a community of authentic reviewers who get exclusive access to new products in exchange for honest feedback.
+          </p>
+
+          <Button 
+            onClick={() => navigate('/signup')}
+            size="lg" 
+            className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Join a Drop Now
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 mt-12 mb-20">
+            <div className="flex items-center gap-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <span className="text-sm text-[#2d2d2d]/70">4.8/5 satisfaction</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-[#A7DADC]" />
+              <span className="text-sm text-[#2d2d2d]/70">2,500+ active members</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-[#A7DADC]" />
+              <span className="text-sm text-[#2d2d2d]/70">150+ brand partners</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* How It Works - Process Diagram */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-center mb-16"
+        >
+          <h2 className="font-display text-4xl text-[#2d2d2d] mb-4">
+            How DropView Works
+          </h2>
+          <p className="text-lg text-[#2d2d2d]/70 max-w-2xl mx-auto">
+            A simple 3-step process to get free products and share your authentic experience
+          </p>
+        </motion.div>
+
+        <div className="relative">
+          {/* Connection Lines */}
+          <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] transform -translate-y-1/2 z-0" />
+          
+          <div className="grid md:grid-cols-3 gap-12 relative z-10">
+            {[
+              {
+                step: "01",
+                title: "Sign up for drops",
+                description: "Create your profile and tell us about your preferences so we can match you with products you'll love.",
+                icon: <Users className="h-10 w-10" />,
+                color: "from-blue-500 to-blue-600"
+              },
+              {
+                step: "02", 
+                title: "Receive free products",
+                description: "Get carefully selected products delivered to your door at no cost. Try them for as long as you need.",
+                icon: <Package className="h-10 w-10" />,
+                color: "from-purple-500 to-purple-600"
+              },
+              {
+                step: "03",
+                title: "Drop your review",
+                description: "Share your honest experience through text or video review to be eligible for your next drop.",
+                icon: <MessageSquare className="h-10 w-10" />,
+                color: "from-green-500 to-green-600"
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                className="text-center"
+              >
+                <Card className="p-8 h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-6 text-white shadow-lg`}>
+                    {item.icon}
+                  </div>
+                  <div className="text-sm font-medium text-[#A7DADC] mb-2 tracking-wider">STEP {item.step}</div>
+                  <h3 className="font-display text-2xl text-[#2d2d2d] mb-4">{item.title}</h3>
+                  <p className="text-[#2d2d2d]/70 leading-relaxed">{item.description}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Value Proposition */}
+      <section className="bg-gradient-to-br from-[#FFD1DC]/10 to-[#A7DADC]/10 py-20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <h2 className="font-display text-3xl md:text-4xl text-[#2d2d2d] mb-6">
+              Why Brands Choose DropView
+            </h2>
+            <p className="text-lg text-[#2d2d2d]/70 mb-12 max-w-3xl mx-auto">
+              We connect brands with real people who provide authentic, detailed feedback that helps improve products and build trust with future customers.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Authentic Reviews",
+                  description: "Real people, real experiences, real feedback",
+                  icon: <CheckCircle className="h-6 w-6" />
+                },
+                {
+                  title: "Detailed Insights",
+                  description: "Both text and video reviews for comprehensive feedback", 
+                  icon: <MessageSquare className="h-6 w-6" />
+                },
+                {
+                  title: "Quality Community",
+                  description: "Carefully curated reviewers who care about honesty",
+                  icon: <Users className="h-6 w-6" />
+                }
+              ].map((benefit, index) => (
+                <div key={index} className="bg-white/80 rounded-2xl p-6 shadow-lg">
+                  <div className="w-12 h-12 rounded-full bg-[#A7DADC]/20 flex items-center justify-center mx-auto mb-4 text-[#A7DADC]">
+                    {benefit.icon}
+                  </div>
+                  <h3 className="font-display text-xl text-[#2d2d2d] mb-2">{benefit.title}</h3>
+                  <p className="text-[#2d2d2d]/70 text-sm">{benefit.description}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="max-w-4xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-3xl text-[#2d2d2d] mb-4">
+            What Our Community Says
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              name: "Sarah M.",
+              review: "I love trying new skincare products before they hit the market. The brands really listen to our feedback!",
+              rating: 5
+            },
+            {
+              name: "Mike K.",
+              review: "Been part of DropView for 6 months. The product quality is amazing and the process is so simple.",
+              rating: 5
+            },
+            {
+              name: "Emma L.",
+              review: "Finally found a platform where my honest opinions actually matter. The video reviews are fun to make too!",
+              rating: 5
+            }
+          ].map((testimonial, index) => (
+            <Card key={index} className="p-6 border-0 shadow-lg">
+              <div className="flex items-center gap-1 mb-3">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-[#2d2d2d]/70 mb-4 italic">"{testimonial.review}"</p>
+              <p className="font-medium text-[#2d2d2d]">– {testimonial.name}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-gradient-to-r from-[#FFD1DC]/10 to-[#A7DADC]/10 rounded-3xl p-12"
+        >
+          <h2 className="font-display text-3xl md:text-4xl text-[#2d2d2d] mb-4">
+            Ready to Join DropView?
+          </h2>
+          <p className="text-lg text-[#2d2d2d]/70 mb-8">
+            Start receiving free products and sharing your authentic reviews today
+          </p>
+          
+          <Button 
+            onClick={() => navigate('/signup')}
+            size="lg"
+            className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Join a Drop Now
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          
+          <div className="flex items-center justify-center gap-6 mt-6 text-sm text-[#2d2d2d]/60">
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              Always free
+            </div>
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              No commitments
+            </div>
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              Real products
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#2d2d2d] text-white py-12">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] flex items-center justify-center">
+              <Gift className="h-3 w-3 text-white" />
+            </div>
+            <span className="font-display text-xl">DropView</span>
+          </div>
+          <p className="text-white/70">
+            Connecting authentic reviewers with innovative brands
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
