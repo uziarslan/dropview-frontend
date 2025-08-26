@@ -14,10 +14,6 @@ const AuthProvider = ({ children }) => {
       if (!token || isTokenExpired(token)) {
         authService.logout();
         setUser(null);
-        const currentPath = window.location.pathname;
-        if (currentPath !== "/login" && currentPath !== "/signup") {
-          window.location.replace("/login");
-        }
       } else {
         const loggedInUser = await authService.getUser();
         setUser(loggedInUser);
