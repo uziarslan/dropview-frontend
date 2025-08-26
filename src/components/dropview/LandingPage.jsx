@@ -86,9 +86,9 @@ export function LandingPage() {
 
         <div className="relative">
           {/* Connection Lines */}
-          <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] transform -translate-y-1/2 z-0" />
+          <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] transform -translate-y-1/2 pointer-events-none" style={{ zIndex: 0 }} />
           
-          <div className="grid md:grid-cols-3 gap-12 relative z-10">
+          <div className="grid md:grid-cols-3 gap-12 relative" style={{ zIndex: 1 }}>
             {[
               {
                 step: "01",
@@ -117,9 +117,10 @@ export function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                className="text-center"
+                className="text-center relative"
+                style={{ zIndex: 1 }}
               >
-                <Card className="p-8 h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Card className="p-8 h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white relative" style={{ zIndex: 1 }}>
                   <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-6 text-white shadow-lg`}>
                     {item.icon}
                   </div>
