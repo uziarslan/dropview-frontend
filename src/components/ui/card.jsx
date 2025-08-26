@@ -28,13 +28,25 @@ function CardHeader({ className, ...props }) {
   );
 }
 
-function CardTitle({ className, ...props }) {
+function CardTitle({ className, children, ...props }) {
+  if (children === undefined || children === null || (typeof children === 'string' && children.trim() === '')) {
+    return (
+      <div
+        data-slot="card-title"
+        className={cn("leading-none", className)}
+        {...props}
+      />
+    );
+  }
+
   return (
     <h4
       data-slot="card-title"
       className={cn("leading-none", className)}
       {...props}
-    />
+    >
+      {children}
+    </h4>
   );
 }
 
