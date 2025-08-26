@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
@@ -14,12 +15,11 @@ import {
   Star
 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { AuthContext } from '../../Context/AuthContext';
 
-export function Dashboard({ 
-  userProgress, 
-  userProfile
-}) {
+export function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFD1DC]/10 via-white to-[#A7DADC]/10">
@@ -33,7 +33,7 @@ export function Dashboard({
               </div>
               <div>
                 <h1 className="font-display text-xl text-[#2d2d2d]">
-                  Welcome back, {userProfile.name}!
+                  Welcome back, {user?.name}!
                 </h1>
                 <p className="text-sm text-[#2d2d2d]/70">
                   Here's your DropView dashboard
@@ -63,22 +63,22 @@ export function Dashboard({
                 title: "Profile Created",
                 description: "Account setup complete",
                 icon: <CheckCircle className="h-6 w-6" />,
-                completed: userProgress.signedUp,
+                completed: !!user,
                 status: "complete"
               },
               {
                 title: "Drop Received",
-                description: userProgress.hasActiveDrop ? "Product in your hands" : "Product on the way",
+                description: user?.hasActiveDrop ? "Product in your hands" : "Product on the way",
                 icon: <Package className="h-6 w-6" />,
-                completed: userProgress.hasActiveDrop,
-                status: userProgress.hasActiveDrop ? "complete" : "pending"
+                completed: user?.hasActiveDrop,
+                status: user?.hasActiveDrop ? "complete" : "pending"
               },
               {
                 title: "Review Submitted",
-                description: userProgress.hasReviewed ? "Thank you for your feedback!" : "Share your experience",
+                description: user?.hasReviewed ? "Thank you for your feedback!" : "Share your experience",
                 icon: <MessageSquare className="h-6 w-6" />,
-                completed: userProgress.hasReviewed,
-                status: userProgress.hasReviewed ? "complete" : userProgress.hasActiveDrop ? "active" : "upcoming"
+                completed: user?.hasReviewed,
+                status: user?.hasReviewed ? "complete" : user?.hasActiveDrop ? "active" : "upcoming"
               }
             ].map((step, index) => (
               <div
@@ -112,7 +112,7 @@ export function Dashboard({
         </motion.div>
 
         {/* Current Drop */}
-        {userProgress.hasActiveDrop && (
+        {user?.hasActiveDrop && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -135,7 +135,7 @@ export function Dashboard({
               </div>
               
               <div className="p-6">
-                {!userProgress.hasReviewed ? (
+                {!user?.hasReviewed ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Clock className="h-4 w-4 text-orange-500" />

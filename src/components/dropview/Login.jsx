@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/card';
@@ -6,22 +6,32 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Mail, Lock, Gift, Info } from 'lucide-react';
+import { AuthContext } from '../../Context/AuthContext';
 
 export function Login({ onLogin }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  });
+  const [loading, setIsLoading] = useState(false);
+
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (onLogin) onLogin(email);
-      navigate('/dashboard');
-    }, 600);
+    setIsLoading(true);
+    
+    if (!formData.username || !formData.password) return;
+    
+    try {
+      login(formData);
+      navigate("/dashboard");
+    }catch (error) {
+      if (error.response && error.response.data && error.response.data.error)
+        console.error(error.response.data);
+    }
   };
 
   return (
@@ -38,11 +48,11 @@ export function Login({ onLogin }) {
       <section className="max-w-md mx-auto px-6 py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <Card className="p-6 border-0 shadow-lg">
-            <h1 className="font-display text-2xl text-[#2d2d2d] mb-2">Welcome back</h1>
-            <p className="text-sm text-[#2d2d2d]/70 mb-6">
+            <h1 className="font-display text-2xl text-[#2d2d2d] mb-z">Welcome back</h1>
+            <p className="text-sm text-[#2d2d2d]/70">
               Sign in to manage your drops, track review progress, and update your preferences.
             </p>
-            <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-xs text-blue-700 mb-6">
+            <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
               <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <p>Your email helps us keep your product drops and account secure.</p>
             </div>
@@ -54,8 +64,8 @@ export function Login({ onLogin }) {
                   <Input
                     type="email"
                     placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username:e.target.value})}
                     className="pl-9"
                     required
                   />
@@ -68,8 +78,8 @@ export function Login({ onLogin }) {
                   <Input
                     type="password"
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password:e.target.value})}
                     className="pl-9"
                     required
                   />

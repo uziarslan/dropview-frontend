@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -8,55 +8,14 @@ import { SignupFlow } from './components/dropview/SignupFlow';
 import { Dashboard } from './components/dropview/Dashboard';
 import { ReviewFlow } from './components/dropview/ReviewFlow';
 import { Login } from './components/dropview/Login';
+import { AuthContext } from './Context/AuthContext';
 
 export default function App() {
-  const [userProgress, setUserProgress] = useState({
-    signedUp: false,
-    hasActiveDrop: false,
-    hasReviewed: false,
-    loggedIn: false,
-  });
-  
-  const [userProfile, setUserProfile] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    totalReviews: 0
-  });
+  const { user } = useContext(AuthContext);
 
-  const handleProgressUpdate = (updates) => {
-    setUserProgress(prev => ({ ...prev, ...updates }));
-  };
+  const isAuthed = !!user;
 
-  const handleSignupComplete = (name, formData) => {
-    setUserProfile(prev => ({
-      ...prev,
-      name,
-      email: formData.email,
-      phone: formData.phone
-    }));
-    
-    handleProgressUpdate({ signedUp: true, hasActiveDrop: true, loggedIn: true });
-  };
-
-  const handleLogin = (email) => {
-    setUserProfile(prev => ({
-      ...prev,
-      email: email || prev.email,
-    }));
-    handleProgressUpdate({ loggedIn: true });
-  };
-
-  const handleReviewComplete = () => {
-    setUserProfile(prev => ({
-      ...prev,
-      totalReviews: prev.totalReviews + 1
-    }));
-    
-    handleProgressUpdate({ hasReviewed: true });
-  };
-
-  const isAuthed = userProgress.signedUp || userProgress.loggedIn;
+  const handleReviewComplete = () => {};
 
   return (
     <div className="min-h-screen bg-white">
@@ -90,7 +49,7 @@ export default function App() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Login onLogin={handleLogin} />
+                  <Login />
                 </motion.div>
               )
             } 
@@ -106,9 +65,7 @@ export default function App() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <SignupFlow 
-                  onComplete={handleSignupComplete}
-                />
+                <SignupFlow />
               </motion.div>
             } 
           />
@@ -124,10 +81,7 @@ export default function App() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Dashboard 
-                    userProgress={userProgress}
-                    userProfile={userProfile}
-                  />
+                  <Dashboard />
                 </motion.div>
               ) : (
                 <Navigate to="/login" replace />
@@ -148,7 +102,6 @@ export default function App() {
                 >
                   <ReviewFlow 
                     onComplete={handleReviewComplete}
-                    userProfile={userProfile}
                   />
                 </motion.div>
               ) : (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
@@ -7,14 +7,16 @@ import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { Card } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ArrowLeft, ArrowRight, Mail, User, MapPin, Users, Info, Phone, Shirt, Palette, Headphones, Dumbbell, Lamp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Mail, User, MapPin, Users, Info, Phone, Shirt, Palette, Headphones, Dumbbell, Lamp, Lock } from 'lucide-react';
+import { AuthContext } from '../../Context/AuthContext';
 
-export function SignupFlow({ onComplete }) {
+export function SignupFlow() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
-    email: '',
+    username: '',
+    password: '',
     name: '',
     phone: '',
     // Step 2: Address
@@ -31,6 +33,8 @@ export function SignupFlow({ onComplete }) {
     productPreferences: [],
     tryFrequency: ''
   });
+
+  const { register } = useContext(AuthContext)
 
   const productCategories = [
     { 
@@ -68,9 +72,6 @@ export function SignupFlow({ onComplete }) {
   const handleNext = () => {
     if (step < 4) {
       setStep(step + 1);
-    } else {
-      onComplete(formData.name, formData);
-      navigate('/dashboard');
     }
   };
 
@@ -81,6 +82,17 @@ export function SignupFlow({ onComplete }) {
       setStep(step - 1);
     }
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await register(formData);
+      navigate("/dashboard");
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.error)
+        console.error(error.response.data);
+    }
+  }
 
   const toggleProductPreference = (prefId) => {
     setFormData(prev => ({
@@ -94,7 +106,7 @@ export function SignupFlow({ onComplete }) {
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return formData.email && formData.name && formData.phone;
+        return formData.username && formData.password && formData.name && formData.phone;
       case 2:
         return formData.street && formData.city && formData.zip;
       case 3:
@@ -194,11 +206,27 @@ export function SignupFlow({ onComplete }) {
                         id="email"
                         type="email"
                         placeholder="your@email.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                        value={formData.username}
+                        onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
                         className="bg-white border-gray-200 focus:border-[#A7DADC]"
                       />
                       <p className="text-xs text-[#2d2d2d]/60 mt-1">For drop notifications and account updates</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="password" className="flex items-center gap-2 mb-2">
+                        <Lock className="h-4 w-4 text-[#A7DADC]" />
+                        Password
+                      </Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Create a strong password"
+                        value={formData.password}
+                        onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                        className="bg-white border-gray-200 focus:border-[#A7DADC]"
+                      />
+                      <p className="text-xs text-[#2d2d2d]/60 mt-1">At least 8 characters recommended</p>
                     </div>
 
                     <div>
@@ -547,7 +575,7 @@ export function SignupFlow({ onComplete }) {
                       Back
                     </Button>
                     <Button
-                      onClick={handleNext}
+                      onClick={handleSubmit}
                       disabled={!isStepValid()}
                       className="flex-1 bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 disabled:opacity-50"
                     >
