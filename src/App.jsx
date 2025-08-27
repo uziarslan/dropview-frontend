@@ -11,11 +11,13 @@ import { Login } from './components/dropview/Login';
 import { AuthContext } from './Context/AuthContext';
 
 export default function App() {
-  const { user } = useContext(AuthContext);
+  const { user, isLoading } = useContext(AuthContext);
 
   const isAuthed = !!user;
 
-  const handleReviewComplete = () => {};
+  const handleReviewComplete = () => { };
+  
+  if (isLoading) return
 
   return (
     <div className="min-h-screen bg-white">

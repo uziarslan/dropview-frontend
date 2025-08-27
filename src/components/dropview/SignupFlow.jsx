@@ -13,6 +13,7 @@ import { AuthContext } from '../../Context/AuthContext';
 export function SignupFlow() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [loading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     username: '',
@@ -85,6 +86,7 @@ export function SignupFlow() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
     try {
       await register(formData);
       navigate("/dashboard");
@@ -576,10 +578,10 @@ export function SignupFlow() {
                     </Button>
                     <Button
                       onClick={handleSubmit}
-                      disabled={!isStepValid()}
+                      disabled={!isStepValid() || loading}
                       className="flex-1 bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 disabled:opacity-50"
                     >
-                      Complete Signup
+                      {loading ? "Signing up..." : "Complete Signup"}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
