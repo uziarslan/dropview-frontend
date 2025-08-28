@@ -1,11 +1,209 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useContext, useState } from 'react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { ArrowRight, Package, MessageSquare, CheckCircle, Gift, Users, Star } from 'lucide-react';
+import { ArrowRight, Package, MessageSquare, CheckCircle, Gift, Users, Star, Menu, X } from 'lucide-react';
+import { AuthContext } from '../../Context/AuthContext';
+import { 
+  IconButton, 
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemText,
+} from '@mui/material';
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    setDrawerOpen(false);
+  };
+
+  const NavigationButtons = () => (
+    <>
+      {user ? (
+        <Button 
+          onClick={() => handleNavigation('/dashboard')}
+          className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          Dashboard
+        </Button>
+      ) : (
+        <div className="flex items-center gap-4">
+          <Button 
+            onClick={() => handleNavigation('/login')}
+            variant="outline"
+            className="border-[#A7DADC] text-[#2d2d2d] hover:bg-[#A7DADC]/10 px-6 py-2 rounded-full transition-all duration-300"
+          >
+            Login
+          </Button>
+          <Button 
+            onClick={() => handleNavigation('/signup')}
+            className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Sign Up
+          </Button>
+        </div>
+      )}
+    </>
+  );
+
+  // Drawer animation variants for framer-motion
+  const drawerVariants = {
+    hidden: { x: '100%', opacity: 0 },
+    visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 400, damping: 40 } },
+    exit: { x: '100%', opacity: 0, transition: { duration: 0.25 } }
+  };
+
+  const MobileDrawer = () => (
+    <AnimatePresence>
+      {drawerOpen && (
+        <>
+          {/* Drawer Panel */}
+          <motion.div
+            key="drawer"
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={drawerVariants}
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1300,
+              width: 280,
+              background: 'white',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <div className="p-6 flex-1 flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] flex items-center justify-center">
+                    <Gift className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="font-display text-lg text-[#2d2d2d]">DropView</span>
+                </div>
+                <IconButton onClick={handleDrawerToggle}>
+                  <X className="h-5 w-5 text-[#2d2d2d]" />
+                </IconButton>
+              </div>
+              
+              <List>
+                {user ? (
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      onClick={() => handleNavigation('/dashboard')}
+                      sx={{
+                        borderRadius: '12px',
+                        marginBottom: '8px',
+                        background: 'linear-gradient(135deg, #FFD1DC 0%, #A7DADC 100%)',
+                        color: '#2d2d2d',
+                        '&:hover': {
+                          opacity: 0.9,
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <ListItemText 
+                        primary="Dashboard" 
+                        primaryTypographyProps={{
+                          style: { fontWeight: 600, fontSize: '16px' }
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ) : (
+                  <>
+                    <ListItem disablePadding>
+                      <ListItemButton 
+                        onClick={() => handleNavigation('/login')}
+                        sx={{
+                          borderRadius: '12px',
+                          marginBottom: '8px',
+                          border: '2px solid #A7DADC',
+                          color: '#2d2d2d',
+                          '&:hover': {
+                            backgroundColor: 'rgba(167, 218, 220, 0.1)',
+                            transform: 'translateY(-1px)',
+                          },
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <ListItemText 
+                          primary="Login" 
+                          primaryTypographyProps={{
+                            style: { fontWeight: 600, fontSize: '16px' }
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                      <ListItemButton 
+                        onClick={() => handleNavigation('/signup')}
+                        sx={{
+                          borderRadius: '12px',
+                          marginBottom: '8px',
+                          background: 'linear-gradient(135deg, #FFD1DC 0%, #A7DADC 100%)',
+                          color: '#2d2d2d',
+                          '&:hover': {
+                            opacity: 0.9,
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          },
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <ListItemText 
+                          primary="Sign Up" 
+                          primaryTypographyProps={{
+                            style: { fontWeight: 600, fontSize: '16px' }
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  </>
+                )}
+              </List>
+            </div>
+          </motion.div>
+          {/* Transparent Overlay for closing drawer when clicking outside */}
+          <motion.div
+            key="drawer-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'transparent',
+              zIndex: 1299,
+              pointerEvents: 'auto'
+            }}
+            onClick={handleDrawerToggle}
+          />
+        </>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -16,7 +214,22 @@ export function LandingPage() {
           </div>
           <span className="font-display text-xl text-[#2d2d2d]">DropView</span>
         </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:block">
+          <NavigationButtons />
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <IconButton onClick={handleDrawerToggle}>
+            <Menu className="h-6 w-6 text-[#2d2d2d]" />
+          </IconButton>
+        </div>
       </header>
+
+      {/* Mobile Drawer */}
+      <MobileDrawer />
 
       {/* Hero Section */}
       <section className="max-w-4xl mx-auto px-6 py-16 text-center">
