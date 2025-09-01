@@ -9,6 +9,7 @@ import { Dashboard } from './components/dropview/Dashboard';
 import { ReviewFlow } from './components/dropview/ReviewFlow';
 import { Login } from './components/dropview/Login';
 import { AuthContext } from './Context/AuthContext';
+import { Dash } from "./components/dropview/Dash";
 
 export default function App() {
   const { user, isLoading } = useContext(AuthContext);
@@ -110,6 +111,13 @@ export default function App() {
                 <Navigate to="/login" replace />
               )
             } 
+          />
+
+          <Route 
+            path="/dash" 
+            element={
+              <Dash />
+            }
           />
           
           {/* Catch all route - redirect to landing */}
