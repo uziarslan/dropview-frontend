@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion.jsx';
 import { 
   Package, 
   MessageSquare, 
@@ -12,7 +13,11 @@ import {
   ArrowRight,
   Gift,
   Calendar,
-  Star
+  Star,
+  Users,
+  Lightbulb,
+  Share2,
+  ExternalLink,
 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { AuthContext } from '../../Context/AuthContext';
@@ -33,22 +38,47 @@ export function Dashboard() {
               </div>
               <div>
                 <h1 className="font-display text-xl text-[#2d2d2d]">
-                  Welcome back, {user?.name}!
+                  DropView
                 </h1>
                 <p className="text-sm text-[#2d2d2d]/70">
-                  Here's your DropView dashboard
+                  {user?.name}
                 </p>
               </div>
             </div>
             <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-              Active Member
+              Beta Pioneer
             </Badge>
           </div>
         </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Coming Soon Section - NEW TOP SECTION */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h2 className="font-display text-2xl text-[#2d2d2d] mb-6">Coming Soon</h2>
+          <Card className="overflow-hidden shadow-lg border-0 bg-gradient-to-br from-[#FFD1DC]/10 to-[#A7DADC]/10">
+            <div className="p-8 text-center">
+              <div className="mb-6">
+                <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] rounded-2xl flex items-center justify-center shadow-lg">
+                  <Gift className="h-12 w-12 text-white" />
+                </div>
+              </div>
+              <h3 className="font-display text-2xl text-[#2d2d2d] mb-3">
+                Your first Drop is coming soon. Stay tuned!
+              </h3>
+              <p className="text-[#2d2d2d]/70 max-w-md mx-auto">
+                We're already in talks with brands to get you exclusive products.
+              </p>
+            </div>
+          </Card>
+        </motion.div>
+        
         {/* Progress Steps */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -108,6 +138,55 @@ export function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </motion.div>
+
+        {/* Be Part of the Launch - NEW SECTION */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8"
+        >
+          <h2 className="font-display text-2xl text-[#2d2d2d] mb-6">Be Part of the Launch</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="p-6 border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group bg-white rounded-xl">
+              <div className="text-center">
+                <div className="p-3 rounded-full bg-[#FFD1DC]/20 w-fit mx-auto mb-4 group-hover:bg-[#FFD1DC]/30 transition-colors">
+                  <Lightbulb className="h-6 w-6 text-[#FFD1DC]" />
+                </div>
+                <h3 className="font-display text-lg text-[#2d2d2d] mb-2">Suggest a Brand</h3>
+                <p className="text-sm text-[#2d2d2d]/70 mb-4">
+                  Which brand do you want us to onboard first?
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="w-full group-hover:bg-[#FFD1DC]/10 border-[#FFD1DC]/30 hover:border-[#FFD1DC] transition-all"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Submit Suggestion
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer group bg-white rounded-xl">
+              <div className="text-center">
+                <div className="p-3 rounded-full bg-[#A7DADC]/20 w-fit mx-auto mb-4 group-hover:bg-[#A7DADC]/30 transition-colors">
+                  <Users className="h-6 w-6 text-[#A7DADC]" />
+                </div>
+                <h3 className="font-display text-lg text-[#2d2d2d] mb-2">Invite Friends</h3>
+                <p className="text-sm text-[#2d2d2d]/70 mb-4">
+                  The more testers we have, the faster brands sign up.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="w-full group-hover:bg-[#A7DADC]/10 border-[#A7DADC]/30 hover:border-[#A7DADC] transition-all"
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share Invite
+                </Button>
+              </div>
+            </Card>
           </div>
         </motion.div>
 
@@ -191,40 +270,51 @@ export function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-8"
         >
-          <h2 className="font-display text-2xl text-[#2d2d2d] mb-4">What to Expect</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6 border-0 shadow-lg">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-full bg-[#A7DADC]/20">
-                  <Calendar className="h-5 w-5 text-[#A7DADC]" />
-                </div>
-                <h3 className="font-display text-lg text-[#2d2d2d]">Review Timeline</h3>
-              </div>
-              <div className="space-y-3 text-sm text-[#2d2d2d]/70">
-                <p>• Try your product for at least 1 week</p>
-                <p>• Submit your review within 30 days</p>
-                <p>• Choose between text or video review</p>
-                <p>• Be eligible for your next drop after reviewing</p>
-              </div>
-            </Card>
-
-            <Card className="p-6 border-0 shadow-lg">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-full bg-[#FFD1DC]/20">
-                  <Star className="h-5 w-5 text-[#FFD1DC]" />
-                </div>
-                <h3 className="font-display text-lg text-[#2d2d2d]">Review Guidelines</h3>
-              </div>
-              <div className="space-y-3 text-sm text-[#2d2d2d]/70">
-                <p>• Be honest and authentic in your feedback</p>
-                <p>• Include both positives and areas for improvement</p>
-                <p>• Help other users make informed decisions</p>
-                <p>• Follow community guidelines for respectful reviews</p>
-              </div>
-            </Card>
-          </div>
+          <h2 className="font-display text-2xl text-[#2d2d2d] mb-6">What to Expect</h2>
+          <Card className="border-0 shadow-lg rounded-xl overflow-hidden">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="timeline" className="border-b border-gray-100">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-[#A7DADC]/20">
+                      <Calendar className="h-5 w-5 text-[#A7DADC]" />
+                    </div>
+                    <span className="font-display text-lg text-[#2d2d2d]">Review Timeline</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-3 text-sm text-[#2d2d2d]/70 ml-11">
+                    <p>• Try your product for at least 1 week</p>
+                    <p>• Submit your review within 30 days</p>
+                    <p>• Choose between text or video review</p>
+                    <p>• Be eligible for your next drop after reviewing</p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="guidelines" className="border-b-0">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-[#FFD1DC]/20">
+                      <Star className="h-5 w-5 text-[#FFD1DC]" />
+                    </div>
+                    <span className="font-display text-lg text-[#2d2d2d]">Review Guidelines</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-3 text-sm text-[#2d2d2d]/70 ml-11">
+                    <p>• Be honest and authentic in your feedback</p>
+                    <p>• Include both positives and areas for improvement</p>
+                    <p>• Help other users make informed decisions</p>
+                    <p>• Follow community guidelines for respectful reviews</p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
         </motion.div>
 
         {/* Community Stats */}
