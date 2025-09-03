@@ -3,22 +3,30 @@ import axiosInstance from "./axiosInstance";
 const API_URL = "/api/auth";
 
 const register = async (userData) => {
-  const response = await axiosInstance.post(
-    `${API_URL}/user/signup`,
-    userData
-  );
-  if (response.data) {
-    localStorage.setItem("token", response.data.token);
+  try {
+    const response = await axiosInstance.post(
+      `${API_URL}/user/signup`,
+      userData
+    );
+    if (response.data) {
+      localStorage.setItem("token", response.data.token);
+    }
+    return response;
+  } catch (error) {
+    throw error; // Re-throw the error so it can be handled by components
   }
-  return response;
 };
 
 const login = async (userData) => {
-  const response = await axiosInstance.post(`${API_URL}/user/login`, userData);
-  if (response.data) {
-    localStorage.setItem("token", response.data.token);
+  try {
+    const response = await axiosInstance.post(`${API_URL}/user/login`, userData);
+    if (response.data) {
+      localStorage.setItem("token", response.data.token);
+    }
+    return response;
+  } catch (error) {
+    throw error; // Re-throw the error so it can be handled by components
   }
-  return response;
 };
 
 const logout = () => {

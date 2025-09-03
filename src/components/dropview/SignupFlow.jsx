@@ -14,6 +14,7 @@ export function SignupFlow() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     username: '',
@@ -87,12 +88,18 @@ export function SignupFlow() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
     try {
       await register(formData);
       navigate("/dashboard");
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.error)
-        console.error(error.response.data);
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -177,10 +184,10 @@ export function SignupFlow() {
                     <h2 className="font-display text-xl text-[#2d2d2d] mb-2">
                       Let's get to know you
                     </h2>
-                    <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-                      <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <p>We need your basic information to create your account and communicate with you about drops.</p>
-                    </div>
+                      <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                        <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <p>We need your basic information to create your account and communicate with you about drops.</p>
+                      </div>
                   </div>
 
                   <div className="space-y-5">
@@ -566,6 +573,13 @@ export function SignupFlow() {
                       <p className="text-xs text-[#2d2d2d]/60 mt-1">This helps us time your drops perfectly</p>
                     </div>
                   </div>
+
+                  {error && (
+                    <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg text-sm text-red-700 border border-red-200">
+                      <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <p>{error}</p>
+                    </div>
+                  )}
 
                   <div className="flex gap-3 pt-4">
                     <Button

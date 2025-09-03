@@ -25,22 +25,26 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData) => {
-    setIsLoading(true);
-    const response = await authService.login(userData);
-    if (response.data) {
-      const loggedInUser = await authService.getUser();
-      setUser(loggedInUser);
+    try {
+      const response = await authService.login(userData);
+      if (response.data) {
+        const loggedInUser = await authService.getUser();
+        setUser(loggedInUser);
+      }
+      return response;
+    } catch (error) {
+      throw error; // Re-throw the error so components can handle it
     }
-    setIsLoading(false);
-    return response;
   };
 
   const register = async (userData) => {
-    setIsLoading(true);
-    await authService.register(userData);
-    const registeredUser = await authService.getUser();
-    setUser(registeredUser);
-    setIsLoading(false);
+    try {
+      await authService.register(userData);
+      const registeredUser = await authService.getUser();
+      setUser(registeredUser);
+    } catch (error) {
+      throw error; // Re-throw the error so components can handle it
+    }
   };
 
   const logout = () => {

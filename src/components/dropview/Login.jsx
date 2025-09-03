@@ -16,21 +16,32 @@ export function Login({ onLogin }) {
     password: ""
   });
   const [loading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const { login } = useContext(AuthContext);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
     
-    if (!formData.username || !formData.password) return;
+    if (!formData.username || !formData.password) {
+      setError("Please fill in all fields");
+      setIsLoading(false);
+      return;
+    }
     
     try {
-      login(formData);
+      await login(formData);
       navigate("/dashboard");
-    }catch (error) {
-      if (error.response && error.response.data && error.response.data.error)
-        console.error(error.response.data);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,10 +63,18 @@ export function Login({ onLogin }) {
             <p className="text-sm text-[#2d2d2d]/70">
               Sign in to manage your drops, track review progress, and update your preferences.
             </p>
-            <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
-              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <p>Your email helps us keep your product drops and account secure.</p>
-            </div>
+            {!error && (
+              <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>Your email helps us keep your product drops and account secure.</p>
+              </div>
+            )}
+            {error && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg text-sm text-red-700 border border-red-200">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label className="mb-2 block">Email</Label>
