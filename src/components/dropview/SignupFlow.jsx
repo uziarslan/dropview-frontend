@@ -31,6 +31,8 @@ export function SignupFlow() {
     stylePreference: '',
     genderIdentity: '',
     familySize: '',
+    occupation: '',
+    purchasePriorities: '',
     // Step 4: Product Preferences
     productPreferences: [],
     tryFrequency: ''
@@ -119,9 +121,9 @@ export function SignupFlow() {
       case 2:
         return formData.street && formData.city && formData.zip;
       case 3:
-        return formData.ageRange && formData.maritalStatus && formData.stylePreference && formData.genderIdentity && formData.familySize;
+        return formData.ageRange && formData.maritalStatus && formData.genderIdentity && formData.familySize && formData.occupation;
       case 4:
-        return formData.productPreferences.length > 0 && formData.tryFrequency;
+        return formData.productPreferences.length > 0 && formData.tryFrequency && formData.stylePreference && formData.purchasePriorities;
       default:
         return false;
     }
@@ -419,22 +421,6 @@ export function SignupFlow() {
                       <p className="text-xs text-[#2d2d2d]/60 mt-1">Helps us match family-appropriate products</p>
                     </div>
 
-                    <div>
-                      <Label className="block mb-2">Which of these styles feels most like you?</Label>
-                      <Select value={formData.stylePreference} onValueChange={(value) => setFormData(prev => ({ ...prev, stylePreference: value }))}>
-                        <SelectTrigger className="bg-white border-gray-200 focus:border-[#A7DADC]">
-                          <SelectValue placeholder="Select your style preference" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="trendy">Trendy</SelectItem>
-                          <SelectItem value="simple">Simple</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                          <SelectItem value="unique">Unique</SelectItem>
-                          <SelectItem value="family">Family</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-[#2d2d2d]/60 mt-1">Helps us curate products that match your aesthetic</p>
-                    </div>
 
                     <div>
                       <Label className="block mb-2">Gender Identity</Label>
@@ -443,10 +429,10 @@ export function SignupFlow() {
                           <SelectValue placeholder="How do you identify?" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="woman">Woman</SelectItem>
-                          <SelectItem value="man">Man</SelectItem>
-                          <SelectItem value="non-binary">Non-binary</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
                           <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-[#2d2d2d]/60 mt-1">Optional, but helps with targeted product matching</p>
@@ -467,6 +453,23 @@ export function SignupFlow() {
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-[#2d2d2d]/60 mt-1">This helps us understand your household needs better</p>
+                    </div>
+
+                    <div>
+                      <Label className="block mb-2">Occupation / Status</Label>
+                      <Select value={formData.occupation} onValueChange={(value) => setFormData(prev => ({ ...prev, occupation: value }))}>
+                        <SelectTrigger className="bg-white border-gray-200 focus:border-[#A7DADC]">
+                          <SelectValue placeholder="Select your occupation or status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="working-professional">Working Professional</SelectItem>
+                          <SelectItem value="business-owner">Business Owner</SelectItem>
+                          <SelectItem value="homemaker">Homemaker</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-[#2d2d2d]/60 mt-1">Helps us understand your lifestyle and preferences</p>
                     </div>
                   </div>
 
@@ -555,6 +558,40 @@ export function SignupFlow() {
                           </button>
                         ))}
                       </div>
+                    </div>
+
+                    <div>
+                      <Label className="block mb-2">Which of these styles feels most like you?</Label>
+                      <Select value={formData.stylePreference} onValueChange={(value) => setFormData(prev => ({ ...prev, stylePreference: value }))}>
+                        <SelectTrigger className="bg-white border-gray-200 focus:border-[#A7DADC]">
+                          <SelectValue placeholder="Select your style preference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="trendy">Trendy</SelectItem>
+                          <SelectItem value="simple">Simple</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="unique">Unique</SelectItem>
+                          <SelectItem value="family">Family</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-[#2d2d2d]/60 mt-1">Helps us curate products that match your aesthetic</p>
+                    </div>
+
+                    <div>
+                      <Label className="block mb-2">When trying something new, what matters most to you?</Label>
+                      <Select value={formData.purchasePriorities} onValueChange={(value) => setFormData(prev => ({ ...prev, purchasePriorities: value }))}>
+                        <SelectTrigger className="bg-white border-gray-200 focus:border-[#A7DADC]">
+                          <SelectValue placeholder="Select what matters most to you" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="price-value">Price / value for money</SelectItem>
+                          <SelectItem value="quality-reliability">Quality & reliability</SelectItem>
+                          <SelectItem value="trend-style">Trend / style factor</SelectItem>
+                          <SelectItem value="brand-reputation">Brand reputation</SelectItem>
+                          <SelectItem value="sustainability-ethics">Sustainability & ethics</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-[#2d2d2d]/60 mt-1">Helps us match you with products that align with your values</p>
                     </div>
 
                     <div>
