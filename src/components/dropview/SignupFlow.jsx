@@ -15,6 +15,7 @@ export function SignupFlow() {
   const [step, setStep] = useState(1);
   const [loading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     username: '',
@@ -39,6 +40,24 @@ export function SignupFlow() {
   });
 
   const { register } = useContext(AuthContext)
+
+  // Email validation function
+  const isValidEmail = (email) => {
+    if (!email) return false;
+    return email.includes('@') && email.endsWith('.com');
+  };
+
+  // Handle email input change with validation
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setFormData(prev => ({ ...prev, username: email }));
+    
+    if (email && !isValidEmail(email)) {
+      setEmailError("Please enter a valid email address with @ and .com");
+    } else {
+      setEmailError("");
+    }
+  };
 
   const productCategories = [
     { 
@@ -117,7 +136,7 @@ export function SignupFlow() {
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return formData.username && formData.password && formData.name && formData.phone;
+        return formData.username && formData.password && formData.name && formData.phone && isValidEmail(formData.username);
       case 2:
         return formData.street && formData.city && formData.zip;
       case 3:
@@ -218,10 +237,14 @@ export function SignupFlow() {
                         type="email"
                         placeholder="your@email.com"
                         value={formData.username}
-                        onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                        className="bg-white border-gray-200 focus:border-[#A7DADC]"
+                        onChange={handleEmailChange}
+                        className={`bg-white border-gray-200 focus:border-[#A7DADC] ${emailError ? 'border-red-300 focus:border-red-500' : ''}`}
                       />
-                      <p className="text-xs text-[#2d2d2d]/60 mt-1">For drop notifications and account updates</p>
+                      {emailError ? (
+                        <p className="text-xs text-red-600 mt-1">{emailError}</p>
+                      ) : (
+                        <p className="text-xs text-[#2d2d2d]/60 mt-1">For drop notifications and account updates</p>
+                      )}
                     </div>
 
                     <div>

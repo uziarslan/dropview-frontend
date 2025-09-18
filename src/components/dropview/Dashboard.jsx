@@ -1,6 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Confetti from 'react-confetti';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -18,16 +19,158 @@ import {
   Lightbulb,
   Share2,
   ExternalLink,
+  X,
+  Sparkles,
 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { AuthContext } from '../../Context/AuthContext';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, isNewUser, setIsNewUser } = useContext(AuthContext);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  // Handle window resize for confetti
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Show confetti and welcome modal for new users
+  useEffect(() => {
+    if (isNewUser && user) {
+      // Start confetti immediately
+      setShowConfetti(true);
+      // Show modal after a short delay to let confetti be visible first
+      setTimeout(() => setShowWelcomeModal(true), 500);
+      // Stop confetti after 8 seconds (longer duration)
+      setTimeout(() => setShowConfetti(false), 8000);
+    }
+  }, [isNewUser, user]);
+
+  const handleCloseWelcomeModal = useCallback(() => {
+    setShowWelcomeModal(false);
+    setIsNewUser(false); // Reset new user flag
+  }, [setIsNewUser]);
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && showWelcomeModal) {
+        handleCloseWelcomeModal();
+      }
+    };
+
+    if (showWelcomeModal) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [showWelcomeModal, handleCloseWelcomeModal]);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFD1DC]/10 via-white to-[#A7DADC]/10">
+      {/* Confetti Effect */}
+      {showConfetti && (
+        <div className="fixed inset-0 pointer-events-none z-[60]">
+          <Confetti
+            width={windowDimensions.width}
+            height={windowDimensions.height}
+            recycle={false}
+            numberOfPieces={400}
+            colors={['#FFD1DC', '#A7DADC', '#FFB6C1', '#87CEEB', '#FFA07A', '#98FB98', '#FF69B4', '#00CED1']}
+            gravity={0.3}
+            wind={0.1}
+          />
+        </div>
+      )}
+
+      {/* Welcome Modal */}
+      {showWelcomeModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={handleCloseWelcomeModal}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#FFD1DC]/20 to-[#A7DADC]/20 rounded-full -translate-y-16 translate-x-16" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-[#A7DADC]/20 to-[#FFD1DC]/20 rounded-full translate-y-12 -translate-x-12" />
+            
+            {/* Close button */}
+            <button
+              onClick={handleCloseWelcomeModal}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-20"
+              aria-label="Close welcome modal"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <div className="mb-6">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] rounded-full flex items-center justify-center shadow-lg">
+                  <Sparkles className="h-10 w-10 text-white" />
+                </div>
+                <h2 className="font-display text-3xl text-[#2d2d2d] mb-2">
+                  Welcome to DropView! 🎉
+                </h2>
+                <p className="text-[#2d2d2d]/70 text-lg">
+                  Hi {user?.name}! You're now part of our exclusive community.
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-green-700">Your profile is all set up</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Gift className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <span className="text-sm text-blue-700">Your first drop is coming soon</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                  <Star className="h-5 w-5 text-purple-500 flex-shrink-0" />
+                  <span className="text-sm text-purple-700">You're a Beta Pioneer!</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm text-[#2d2d2d]/60">
+                  We'll send you free products to try and review. Your honest feedback helps brands improve and other users make better decisions.
+                </p>
+                <Button
+                  onClick={handleCloseWelcomeModal}
+                  className="w-full bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90"
+                >
+                  Let's Get Started!
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
       {/* Header */}
       <header className="bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 py-6">

@@ -6,6 +6,7 @@ export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -42,6 +43,7 @@ const AuthProvider = ({ children }) => {
       await authService.register(userData);
       const registeredUser = await authService.getUser();
       setUser(registeredUser);
+      setIsNewUser(true); // Mark as new user for confetti
     } catch (error) {
       throw error; // Re-throw the error so components can handle it
     }
@@ -70,6 +72,8 @@ const AuthProvider = ({ children }) => {
         logout,
         isLoading,
         setIsLoading,
+        isNewUser,
+        setIsNewUser,
       }}
     >
       {children}
