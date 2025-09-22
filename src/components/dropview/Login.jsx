@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -10,6 +10,7 @@ import { AuthContext } from '../../Context/AuthContext';
 
 export function Login({ onLogin }) {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [formData, setFormData] = useState({
     username: "",
@@ -33,7 +34,13 @@ export function Login({ onLogin }) {
     
     try {
       await login(formData);
-      navigate("/dashboard");
+      if (onLogin) {
+        onLogin();
+        return;
+      }
+      const params = new URLSearchParams(location.search);
+      const redirect = params.get("redirect");
+      navigate(redirect || "/dashboard");
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         setError(error.response.data.error);

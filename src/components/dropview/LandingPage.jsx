@@ -30,12 +30,21 @@ export function LandingPage() {
   const NavigationButtons = () => (
     <>
       {user ? (
-        <Button 
-          onClick={() => handleNavigation('/dashboard')}
-          className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          Dashboard
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => handleNavigation('/community')}
+            variant="outline"
+            className="border-[#A7DADC] text-[#2d2d2d] hover:bg-[#A7DADC]/10 px-6 py-2 rounded-full transition-all duration-300"
+          >
+            Community
+          </Button>
+          <Button 
+            onClick={() => handleNavigation('/dashboard')}
+            className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Dashboard
+          </Button>
+        </div>
       ) : (
         <div className="flex items-center gap-4">
           <Button 
@@ -102,32 +111,80 @@ export function LandingPage() {
               
               <List>
                 {user ? (
-                  <ListItem disablePadding>
-                    <ListItemButton 
-                      onClick={() => handleNavigation('/dashboard')}
-                      sx={{
-                        borderRadius: '12px',
-                        marginBottom: '8px',
-                        background: 'linear-gradient(135deg, #FFD1DC 0%, #A7DADC 100%)',
-                        color: '#2d2d2d',
-                        '&:hover': {
-                          opacity: 0.9,
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                        },
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      <ListItemText 
-                        primary="Dashboard" 
-                        primaryTypographyProps={{
-                          style: { fontWeight: 600, fontSize: '16px' }
+                  <>
+                    <ListItem disablePadding>
+                      <ListItemButton 
+                        onClick={() => handleNavigation('/dashboard')}
+                        sx={{
+                          borderRadius: '12px',
+                          marginBottom: '8px',
+                          background: 'linear-gradient(135deg, #FFD1DC 0%, #A7DADC 100%)',
+                          color: '#2d2d2d',
+                          '&:hover': {
+                            opacity: 0.9,
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          },
+                          transition: 'all 0.3s ease'
                         }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
+                      >
+                        <ListItemText 
+                          primary="Dashboard" 
+                          primaryTypographyProps={{
+                            style: { fontWeight: 600, fontSize: '16px' }
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                      <ListItemButton 
+                        onClick={() => handleNavigation('/community')}
+                        sx={{
+                          borderRadius: '12px',
+                          marginBottom: '8px',
+                          border: '2px solid #A7DADC',
+                          color: '#2d2d2d',
+                          '&:hover': {
+                            backgroundColor: 'rgba(167, 218, 220, 0.1)',
+                            transform: 'translateY(-1px)',
+                          },
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <ListItemText 
+                          primary="Community" 
+                          primaryTypographyProps={{
+                            style: { fontWeight: 600, fontSize: '16px' }
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  </>
                 ) : (
                   <>
+                    <ListItem disablePadding>
+                      <ListItemButton 
+                        onClick={() => handleNavigation('/community')}
+                        sx={{
+                          borderRadius: '12px',
+                          marginBottom: '8px',
+                          border: '2px solid #A7DADC',
+                          color: '#2d2d2d',
+                          '&:hover': {
+                            backgroundColor: 'rgba(167, 218, 220, 0.1)',
+                            transform: 'translateY(-1px)',
+                          },
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <ListItemText 
+                          primary="Community" 
+                          primaryTypographyProps={{
+                            style: { fontWeight: 600, fontSize: '16px' }
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
                     <ListItem disablePadding>
                       <ListItemButton 
                         onClick={() => handleNavigation('/login')}
@@ -391,6 +448,35 @@ export function LandingPage() {
             </div>
           </motion.div>
         </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="max-w-4xl mx-auto px-6 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-center"
+        >
+          <h2 className="font-display text-4xl text-[#2d2d2d] mb-4">
+            Community
+          </h2>
+          <h3 className="font-display text-2xl text-[#2d2d2d]/80 mb-6">
+            Where Smart Shopping Begins
+          </h3>
+          <p className="text-lg text-[#2d2d2d]/70 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Ask before buying, share experiences, help others shop smarter. Join thousands of authentic reviewers making informed decisions together.
+          </p>
+          
+          <Button 
+            onClick={() => handleNavigation('/community')}
+            size="lg"
+            className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Visit Community
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </motion.div>
       </section>
 
       {/* Social Proof */}

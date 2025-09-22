@@ -7,8 +7,11 @@ import { LandingPage } from './components/dropview/LandingPage';
 import { SignupFlow } from './components/dropview/SignupFlow';
 import { Dashboard } from './components/dropview/Dashboard';
 import { ReviewFlow } from './components/dropview/ReviewFlow';
+import { Community } from './components/dropview/Community';
 import { Login } from './components/dropview/Login';
 import { AuthContext } from './Context/AuthContext';
+import ProfileSettings from './components/dropview/ProfileSettings.jsx';
+import Notifications from './components/dropview/Notifications.jsx';
 
 export default function App() {
   const { user, isLoading } = useContext(AuthContext);
@@ -89,6 +92,56 @@ export default function App() {
                 <Navigate to="/login" replace />
               )
             } 
+          />
+          {/* Profile Settings - Protected */}
+          <Route 
+            path="/settings/profile" 
+            element={
+              isAuthed ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ProfileSettings />
+                </motion.div>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          {/* Notifications - Protected */}
+          <Route 
+            path="/settings/notifications" 
+            element={
+              isAuthed ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Notifications />
+                </motion.div>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          {/* Community - Public (gated actions inside) */}
+          <Route
+            path="/community"
+            element={
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Community />
+              </motion.div>
+            }
           />
           
           {/* Review Flow - Protected route (requires auth) */}
