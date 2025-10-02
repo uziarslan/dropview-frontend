@@ -22,7 +22,8 @@ import {
   MoreHorizontal,
   Check,
   Save,
-  Menu
+  Menu,
+  Pen
 } from "lucide-react";
 import { AuthContext } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +47,21 @@ export const Community = () => {
   const [createType, setCreateType] = useState("question");
   const [createTitle, setCreateTitle] = useState("");
   const [createContent, setCreateContent] = useState("");
+  const [createImage, setCreateImage] = useState(null);
+  const [createImagePreview, setCreateImagePreview] = useState(null);
+  // Edit post modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPost, setEditPost] = useState(null);
+  const [editType, setEditType] = useState("question");
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editImage, setEditImage] = useState(null);
+  const [editImagePreview, setEditImagePreview] = useState(null);
+  // Loading states
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
+  const [isUpdatingPost, setIsUpdatingPost] = useState(false);
+  const [isDeletingImage, setIsDeletingImage] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(new Set());
 
   const loadPosts = async () => {
     setLoading(true);
@@ -76,21 +92,110 @@ export const Community = () => {
     }
   };
 
+  // Image handling functions
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCreateImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setCreateImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setCreateImage(null);
+    setCreateImagePreview(null);
+  };
+
+  // Edit modal functions
+  const openEditModal = (post) => {
+    setEditPost(post);
+    setEditType(post.type);
+    setEditTitle(post.title || '');
+    setEditContent(post.content);
+    setEditImage(null);
+    setEditImagePreview(null);
+    setShowEditModal(true);
+  };
+
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setEditPost(null);
+    setEditType("question");
+    setEditTitle("");
+    setEditContent("");
+    setEditImage(null);
+    setEditImagePreview(null);
+  };
+
+  const handleEditImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEditImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setEditImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeEditImage = () => {
+    setEditImage(null);
+    setEditImagePreview(null);
+  };
+
+  const submitEditPost = async () => {
+    if (!editContent.trim()) return;
+    
+    setIsUpdatingPost(true);
+    try {
+      // If there's a new image, first delete the old one from Cloudinary
+      if (editImage && editPost.image && editPost.image.path) {
+        try {
+          await communityService.deletePostImage(editPost._id);
+        } catch (error) {
+          // Continue with update even if old image deletion fails
+        }
+      }
+      
+      await communityService.updatePost(
+        editPost._id,
+        { type: editType, title: editTitle || undefined, content: editContent },
+        editImage
+      );
+      closeEditModal();
+      loadPosts();
+    } catch (e) {
+      setError(e?.response?.data?.error || "Failed to update post");
+    } finally {
+      setIsUpdatingPost(false);
+    }
+  };
+
   // New: submit from modal
   const submitCreatePost = async () => {
     if (!user) { setShowLoginModal(true); return; }
     if (!createContent.trim()) return;
+    
+    setIsCreatingPost(true);
     try {
-      await communityService.createPost({ type: createType, title: createTitle || undefined, content: createContent });
+      await communityService.createPost(
+        { type: createType, title: createTitle || undefined, content: createContent },
+        createImage
+      );
       // reset and close
       setShowCreateModal(false);
       setCreateStep(1);
       setCreateType("question");
       setCreateTitle("");
       setCreateContent("");
+      setCreateImage(null);
+      setCreateImagePreview(null);
       loadPosts();
     } catch (e) {
       setError(e?.response?.data?.error || "Failed to create post");
+    } finally {
+      setIsCreatingPost(false);
     }
   };
 
@@ -154,24 +259,27 @@ export const Community = () => {
     }
   };
 
-  const updatePost = async (postId, updatedData) => {
+  const deletePostImage = async (postId) => {
     if (!user) return;
     
-    // Optimistic update
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post._id === postId ? { ...post, ...updatedData } : post
-      )
-    );
-    
-    // Silent backend update
+    setIsDeletingImage(true);
     try {
-      await communityService.updatePost(postId, updatedData);
+      await communityService.deletePostImage(postId);
+      // Update local state after successful deletion
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === postId 
+            ? { ...post, image: undefined }
+            : post
+        )
+      );
     } catch (error) {
-      // Revert on error - reload posts
-      loadPosts();
+      setError('Failed to delete image');
+    } finally {
+      setIsDeletingImage(false);
     }
   };
+
   const filteredPosts = useMemo(() => {
     let filtered = posts;
     if (activeTab !== "all") {
@@ -534,7 +642,10 @@ export const Community = () => {
                         post={p} 
                         onToggleLike={toggleLike} 
                         onDeletePost={deletePost}
-                        onUpdatePost={updatePost}
+                        onEditPost={openEditModal}
+                        onDeleteImage={deletePostImage}
+                        loadingImages={loadingImages}
+                        setLoadingImages={setLoadingImages}
                         onCommentCountChange={(postId, delta) => {
                           setPosts(prevPosts => 
                             prevPosts.map(post => 
@@ -731,11 +842,56 @@ export const Community = () => {
                   onChange={(e) => setCreateContent(e.target.value)}
                   className="min-h-[140px] border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
                 />
+                
+                {/* Image Upload Section */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-[#2d2d2d]">Add an image (optional)</label>
+                  {!createImagePreview ? (
+                    <div className="border-2 border-dashed border-[#A7DADC]/30 rounded-lg p-6 text-center hover:border-[#A7DADC]/50 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label
+                        htmlFor="image-upload"
+                        className="cursor-pointer flex flex-col items-center gap-2"
+                      >
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFD1DC]/20 to-[#A7DADC]/20 flex items-center justify-center">
+                          <Plus className="h-6 w-6 text-[#A7DADC]" />
+                        </div>
+                        <span className="text-sm text-[#2d2d2d]/70">Click to upload an image</span>
+                        <span className="text-xs text-[#2d2d2d]/50">PNG, JPG up to 5MB</span>
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={createImagePreview}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={removeImage}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
                 <div className="flex items-center justify-end gap-2">
-                  <Button variant="outline" className="border-[#A7DADC]/30" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-                  <Button onClick={submitCreatePost} disabled={!createContent.trim()} className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90">
-                    <Send className="h-4 w-4 mr-1" />
-                    Post
+                  <Button variant="outline" className="border-[#A7DADC]/30" onClick={() => setShowCreateModal(false)} disabled={isCreatingPost}>Cancel</Button>
+                  <Button onClick={submitCreatePost} disabled={!createContent.trim() || isCreatingPost} className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90">
+                    {isCreatingPost ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2d2d2d] mr-1"></div>
+                    ) : (
+                      <Send className="h-4 w-4 mr-1" />
+                    )}
+                    {isCreatingPost ? 'Creating...' : 'Post'}
                   </Button>
                 </div>
               </div>
@@ -743,19 +899,195 @@ export const Community = () => {
           </motion.div>
         </div>
       )}
+
+      {/* Edit Post Modal */}
+      {showEditModal && editPost && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeEditModal}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-lg w-full" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="font-display text-xl text-[#2d2d2d]">Edit post</h3>
+              <button className="p-2 hover:bg-gray-100 rounded-full" onClick={closeEditModal}>
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant="secondary"
+                  className={`${editType==='question' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-purple-100 text-purple-700 border-purple-200'}`}
+                >
+                  {editType==='question' ? '🤔 Question' : '✨ Experience'}
+                </Badge>
+                <button className="text-xs text-[#A7DADC] hover:underline" onClick={() => {
+                  // Toggle between question and experience
+                  setEditType(editType === 'question' ? 'experience' : 'question');
+                }}>Change type</button>
+              </div>
+              
+              {editType==='experience' && (
+                <Input
+                  placeholder="Title (optional)"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
+                />
+              )}
+              
+              <Textarea
+                placeholder={editType==='question' ? 'What do you want to ask?' : 'Share your experience...'}
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="min-h-[140px] border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
+              />
+              
+              {/* Current Image Display */}
+              {editPost.image && editPost.image.path && !editImagePreview && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#2d2d2d]">Current image</label>
+                  <div className="relative">
+                    <img
+                      src={editPost.image.path}
+                      alt={editPost.image.filename || "Current image"}
+                      className="w-full max-w-md h-48 object-cover rounded-lg"
+                    />
+                    <div className="absolute top-2 right-5 flex gap-1">
+                      <button
+                        onClick={() => {
+                          // Trigger file picker
+                          document.getElementById('edit-image-upload').click();
+                        }}
+                        className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg"
+                        title="Change image"
+                      >
+                        <Pen className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Delete current image using the main component's delete function
+                          deletePostImage(editPost._id);
+                          // Update edit post state
+                          setEditPost({ ...editPost, image: undefined });
+                        }}
+                        disabled={isDeletingImage}
+                        className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg disabled:opacity-50"
+                        title="Delete image"
+                      >
+                        {isDeletingImage ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                          <X className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* New Image Preview */}
+              {editImagePreview && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#2d2d2d]">New image preview</label>
+                  <div className="relative">
+                    <img
+                      src={editImagePreview}
+                      alt="Preview"
+                      className="w-full max-w-md h-48 object-cover rounded-lg"
+                    />
+                    <div className="absolute top-3 right-5 flex gap-1">
+                      <button
+                        onClick={() => {
+                          // Trigger file picker to change image
+                          document.getElementById('edit-image-upload').click();
+                        }}
+                        className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg"
+                        title="Change image"
+                      >
+                        <Pen className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={removeEditImage}
+                        className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                        title="Remove image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Image Upload Section - Only show when no current image */}
+              {(!editPost.image || !editPost.image.path) && !editImagePreview && (
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-[#2d2d2d]">Add an image (optional)</label>
+                  <div className="border-2 border-dashed border-[#A7DADC]/30 rounded-lg p-6 text-center hover:border-[#A7DADC]/50 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditImageSelect}
+                      className="hidden"
+                      id="edit-image-upload"
+                    />
+                    <label
+                      htmlFor="edit-image-upload"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFD1DC]/20 to-[#A7DADC]/20 flex items-center justify-center">
+                        <Plus className="h-6 w-6 text-[#A7DADC]" />
+                      </div>
+                      <span className="text-sm text-[#2d2d2d]/70">Click to upload an image</span>
+                      <span className="text-xs text-[#2d2d2d]/50">PNG, JPG up to 5MB</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Hidden file input for when there is an image */}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleEditImageSelect}
+                className="hidden"
+                id="edit-image-upload"
+              />
+              
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" className="border-[#A7DADC]/30" onClick={closeEditModal} disabled={isUpdatingPost}>Cancel</Button>
+                <Button onClick={submitEditPost} disabled={!editContent.trim() || isUpdatingPost} className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90">
+                  {isUpdatingPost ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2d2d2d] mr-1"></div>
+                  ) : (
+                    <Save className="h-4 w-4 mr-1" />
+                  )}
+                  {isUpdatingPost ? 'Updating...' : 'Update Post'}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
 
-const PostItem = ({ post, onToggleLike, onDeletePost, onUpdatePost, onCommentCountChange }) => {
+const PostItem = ({ post, onToggleLike, onDeletePost, onEditPost, onDeleteImage, onCommentCountChange, loadingImages, setLoadingImages }) => {
   const [showComments, setShowComments] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(post.content);
-  const [editTitle, setEditTitle] = useState(post.title || '');
   const [showActions, setShowActions] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const actionsRef = useRef(null);
+  const imageTimeoutRef = useRef(null);
+  const imageRef = useRef(null);
   const { user } = useContext(AuthContext);
   
   const isLikedByUser = post.likes?.some(like => like.toString() === user?._id?.toString());
@@ -763,28 +1095,101 @@ const PostItem = ({ post, onToggleLike, onDeletePost, onUpdatePost, onCommentCou
   const isAuthor = user?._id?.toString() === post.author?._id?.toString();
 
   const handleEdit = () => {
-    setIsEditing(true);
-    setEditContent(post.content);
-    setEditTitle(post.title || '');
-  };
-
-  const handleSave = () => {
-    onUpdatePost(post._id, { 
-      content: editContent, 
-      title: editTitle 
-    });
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditContent(post.content);
-    setEditTitle(post.title || '');
+    onEditPost(post);
   };
 
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
+
+  const handleImageLoad = () => {
+    setImageError(false);
+    setImageLoading(false);
+    // Clear timeout if image loads successfully
+    if (imageTimeoutRef.current) {
+      clearTimeout(imageTimeoutRef.current);
+      imageTimeoutRef.current = null;
+    }
+    // Remove from global loading state
+    setLoadingImages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(post._id);
+      return newSet;
+    });
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+    // Clear timeout if image errors
+    if (imageTimeoutRef.current) {
+      clearTimeout(imageTimeoutRef.current);
+      imageTimeoutRef.current = null;
+    }
+    // Remove from global loading state
+    setLoadingImages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(post._id);
+      return newSet;
+    });
+  };
+
+  // Intersection observer for lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    const currentImageRef = imageRef.current;
+    if (currentImageRef) {
+      observer.observe(currentImageRef);
+    }
+
+    return () => {
+      if (currentImageRef) {
+        observer.unobserve(currentImageRef);
+      }
+    };
+  }, []);
+
+  // Initialize image loading state when component mounts and is in view
+  useEffect(() => {
+    if (post.image && post.image.path && isInView) {
+      setImageLoading(true);
+      setImageError(false);
+      
+      // Add to global loading state
+      setLoadingImages(prev => new Set([...prev, post._id]));
+      
+      // Set timeout for image loading (10 seconds)
+      imageTimeoutRef.current = setTimeout(() => {
+        setImageError(true);
+        setImageLoading(false);
+        setLoadingImages(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(post._id);
+          return newSet;
+        });
+      }, 10000);
+    }
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (imageTimeoutRef.current) {
+        clearTimeout(imageTimeoutRef.current);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post._id, post.image?.path, isInView, setLoadingImages]); // Use post.image?.path to avoid infinite loops
+
 
   const triggerHeartAnimation = () => {
     setIsHeartAnimating(true);
@@ -870,48 +1275,69 @@ const PostItem = ({ post, onToggleLike, onDeletePost, onUpdatePost, onCommentCou
           </div>
 
           {/* Title & Content */}
-          {isEditing ? (
-            <div className="space-y-3 mb-4">
-              {post.title && (
-                <Input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="Post title"
-                  className="border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
+          {post.title && (
+            <h3 className="font-display text-lg text-[#2d2d2d] mb-1">{post.title}</h3>
+          )}
+          <div className="text-[#2d2d2d]/80 leading-relaxed whitespace-pre-wrap mb-2">{post.content}</div>
+          {post.image && post.image.path && (
+            <div className="mt-3 relative" ref={imageRef}>
+              {/* Placeholder when not in view */}
+              {!isInView && (
+                <div className="w-full max-w-md h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span className="text-sm text-gray-400">Image will load when visible</span>
+                </div>
+              )}
+              
+              {/* Loading state */}
+              {isInView && imageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A7DADC]"></div>
+                    <span className="text-sm text-gray-500">Loading image...</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Error state */}
+              {imageError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg z-10">
+                  <div className="flex flex-col items-center gap-2 text-gray-500">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="text-sm">Failed to load image</span>
+                    <button 
+                      onClick={() => {
+                        setImageError(false);
+                        setImageLoading(true);
+                        // Retry loading
+                        const img = new Image();
+                        img.onload = handleImageLoad;
+                        img.onerror = handleImageError;
+                        img.src = post.image.path;
+                      }}
+                      className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Image - only render when in view */}
+              {isInView && (
+                <img
+                  src={post.image.path}
+                  alt={post.image.filename || "Post image"}
+                  className={`w-full max-w-md h-auto rounded-lg shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
+                    imageLoading ? 'opacity-0' : 'opacity-100'
+                  } ${imageError ? 'opacity-0' : ''}`}
+                  onClick={() => window.open(post.image.path, '_blank')}
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
                 />
               )}
-              <Textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                placeholder="What's on your mind?"
-                className="min-h-[100px] border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
-              />
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleSave}
-                  size="sm"
-                  className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90"
-                >
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  variant="outline"
-                  size="sm"
-                  className="border-[#A7DADC]/30"
-                >
-                  Cancel
-                </Button>
-              </div>
             </div>
-          ) : (
-            <>
-              {post.title && (
-                <h3 className="font-display text-lg text-[#2d2d2d] mb-1">{post.title}</h3>
-              )}
-              <div className="text-[#2d2d2d]/80 leading-relaxed whitespace-pre-wrap mb-2">{post.content}</div>
-            </>
           )}
 
           {/* Actions */}

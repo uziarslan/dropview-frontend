@@ -2,9 +2,45 @@ import axios from "./axiosInstance";
 
 const communityService = {
     listPosts: (params = {}) => axios.get("/api/community/posts", { params }),
-    createPost: (payload) => axios.post("/api/community/posts", payload),
-    updatePost: (postId, payload) => axios.put(`/api/community/posts/${postId}`, payload),
+    createPost: (payload, imageFile = null) => {
+        if (imageFile) {
+            // Use FormData for file upload
+            const formData = new FormData();
+            formData.append('type', payload.type);
+            formData.append('content', payload.content);
+            if (payload.title) formData.append('title', payload.title);
+            formData.append('image', imageFile);
+
+            return axios.post("/api/community/posts", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        } else {
+            // Regular JSON request for posts without images
+            return axios.post("/api/community/posts", payload);
+        }
+    },
+    updatePost: (postId, payload, imageFile = null) => {
+        if (imageFile) {
+            // Use FormData for file upload
+            const formData = new FormData();
+            formData.append('content', payload.content);
+            if (payload.title !== undefined) formData.append('title', payload.title);
+            formData.append('image', imageFile);
+
+            return axios.put(`/api/community/posts/${postId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        } else {
+            // Regular JSON request for posts without images
+            return axios.put(`/api/community/posts/${postId}`, payload);
+        }
+    },
     deletePost: (postId) => axios.delete(`/api/community/posts/${postId}`),
+    deletePostImage: (postId) => axios.delete(`/api/community/posts/${postId}/image`),
     togglePostLike: (postId) => axios.post(`/api/community/posts/${postId}/like`),
 
     listComments: (postId, params = {}) => axios.get(`/api/community/posts/${postId}/comments`, { params }),
