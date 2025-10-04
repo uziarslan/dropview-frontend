@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
@@ -9,6 +9,7 @@ import { Card } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ArrowLeft, ArrowRight, Mail, User, MapPin, Users, Info, Phone, Shirt, Palette, Headphones, Dumbbell, Lamp, Lock } from 'lucide-react';
 import { AuthContext } from '../../Context/AuthContext';
+import { referralService } from '../../services/referralService';
 
 export function SignupFlow() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function SignupFlow() {
   const [loading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [referralInfo, setReferralInfo] = useState(null);
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     username: '',
@@ -41,6 +43,24 @@ export function SignupFlow() {
   });
 
   const { register } = useContext(AuthContext)
+
+  // Handle referral code from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const referralCode = params.get('ref');
+    
+    if (referralCode) {
+      // Validate the referral code
+      referralService.validateReferralCode(referralCode)
+        .then(data => {
+          setReferralInfo(data);
+        })
+        .catch(error => {
+          console.error('Invalid referral code:', error);
+          // Don't show error to user, just ignore the referral code
+        });
+    }
+  }, [location.search]);
 
   // Email validation function
   const isValidEmail = (email) => {
@@ -112,7 +132,13 @@ export function SignupFlow() {
     setIsLoading(true)
     setError("")
     try {
-      await register(formData);
+      // Include referral code if available
+      const submitData = {
+        ...formData,
+        referralCode: referralInfo?.referralCode || null
+      };
+      
+      await register(submitData);
       const params = new URLSearchParams(location.search);
       const redirect = params.get("redirect");
       navigate(redirect || "/dashboard");
@@ -172,6 +198,13 @@ export function SignupFlow() {
           </div>
           <h1 className="font-display text-2xl text-[#2d2d2d] mb-2">Join DropView</h1>
           <p className="text-[#2d2d2d]/70">Help us match you with the perfect products</p>
+          {referralInfo && (
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700">
+                🎉 You were invited by <strong>{referralInfo.referrerName}</strong>! You'll both get benefits when you join.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Enhanced Progress Bar */}

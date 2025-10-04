@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { AuthContext } from '../../Context/AuthContext';
+import { referralService } from '../../services/referralService';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -34,10 +35,30 @@ export function Dashboard() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [referralData, setReferralData] = useState(null);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  // Fetch referral data
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      try {
+        const data = await referralService.getReferralInfo();
+        setReferralData(data);
+      } catch (error) {
+        console.error('Error fetching referral data:', error);
+        setShareMessage('Failed to load referral data. Please refresh the page.');
+      }
+    };
+
+    if (user) {
+      fetchReferralData();
+    }
+  }, [user]);
 
   // Handle window resize for confetti
   useEffect(() => {
@@ -68,6 +89,37 @@ export function Dashboard() {
     setShowWelcomeModal(false);
     setIsNewUser(false); // Reset new user flag
   }, [setIsNewUser]);
+
+  // Handle share referral link
+  const handleShareReferral = async () => {
+    if (!referralData) {
+      setShareMessage('Referral data not loaded. Please refresh the page.');
+      return;
+    }
+    
+    setShareLoading(true);
+    setShareMessage('');
+    
+    try {
+      const result = await referralService.shareReferralLink(referralData.referralLink, user?.name);
+      
+      if (result && result.success) {
+        if (result.method === 'clipboard') {
+          setShareMessage('Referral link copied to clipboard!');
+        }
+        // No message for native share as it's self-explanatory
+      } else {
+        setShareMessage('Failed to share. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error sharing referral:', error);
+      setShareMessage('Failed to share. Please try again.');
+    } finally {
+      setShareLoading(false);
+      // Clear message after 3 seconds
+      setTimeout(() => setShareMessage(''), 3000);
+    }
+  };
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -509,16 +561,28 @@ export function Dashboard() {
                   <Users className="h-6 w-6 text-[#A7DADC]" />
                 </div>
                 <h3 className="font-display text-lg text-[#2d2d2d] mb-2">Invite Friends</h3>
-                <p className="text-sm text-[#2d2d2d]/70 mb-4">
+                <p className="text-sm text-[#2d2d2d]/70 mb-2">
                   The more testers we have, the faster brands sign up.
                 </p>
+                {referralData && (
+                  <div className="mb-4 p-3 bg-gradient-to-r from-[#A7DADC]/20 to-[#FFD1DC]/20 rounded-lg border border-[#A7DADC]/30">
+                    <p className="text-sm font-semibold text-[#2d2d2d] text-center">
+                      {referralData.referralsCount} friend{referralData.referralsCount !== 1 ? 's' : ''} joined so far! 🎉
+                    </p>
+                  </div>
+                )}
                 <Button 
+                  onClick={handleShareReferral}
+                  disabled={shareLoading || !referralData}
                   variant="outline" 
-                  className="w-full group-hover:bg-[#A7DADC]/10 border-[#A7DADC]/30 hover:border-[#A7DADC] transition-all"
+                  className="w-full group-hover:bg-[#A7DADC]/10 border-[#A7DADC]/30 hover:border-[#A7DADC] transition-all disabled:opacity-50"
                 >
                   <Share2 className="mr-2 h-4 w-4" />
-                  Share Invite
+                  {shareLoading ? 'Sharing...' : 'Share Invite'}
                 </Button>
+                {shareMessage && (
+                  <p className="mt-2 text-xs text-green-600">{shareMessage}</p>
+                )}
               </div>
             </Card>
           </div>
@@ -650,6 +714,7 @@ export function Dashboard() {
             </Accordion>
           </Card>
         </motion.div>
+
 
         {/* Community Stats */}
         <motion.div
