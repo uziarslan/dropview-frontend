@@ -35,11 +35,9 @@ export const Community = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ type: "question", title: "", content: "" });
   const [activeTab, setActiveTab] = useState("all");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showPostForm, setShowPostForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // New create-post modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -79,18 +77,6 @@ export const Community = () => {
     loadPosts();
   }, []);
 
-  const submitPost = async (e) => {
-    e.preventDefault();
-    if (!form.content.trim()) return;
-    if (!user) { setShowLoginModal(true); return; }
-    try {
-      await communityService.createPost(form);
-      setForm({ type: form.type, title: "", content: "" });
-      loadPosts();
-    } catch (e) {
-      setError(e?.response?.data?.error || "Failed to create post");
-    }
-  };
 
   // Image handling functions
   const handleImageSelect = (e) => {
@@ -548,69 +534,6 @@ export const Community = () => {
               </Card>
             </motion.div>
 
-            {/* Post Form */}
-            <AnimatePresence>
-              {showPostForm && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card className="p-6 border-0 shadow-lg bg-gradient-to-br from-[#FFD1DC]/10 to-[#A7DADC]/10">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] flex items-center justify-center">
-                        <Users className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-display text-lg text-[#2d2d2d]">Share something amazing</h3>
-                    </div>
-                    <form onSubmit={submitPost} className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <select
-                          className="border border-[#A7DADC]/30 rounded-lg px-3 py-2 bg-white focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
-                          value={form.type}
-                          onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-                        >
-                          <option value="question">🤔 Ask a question</option>
-                          <option value="experience">✨ Share an experience</option>
-                        </select>
-                        <Input
-                          placeholder="Title (optional for questions)"
-                          value={form.title}
-                          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                          className="border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
-                        />
-                      </div>
-                      <Textarea
-                        placeholder={user ? "What's on your mind? Share your thoughts..." : "Log in to post and join the conversation..."}
-                        value={form.content}
-                        onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                        className="min-h-[120px] border-[#A7DADC]/30 focus:border-[#A7DADC] focus:ring-2 focus:ring-[#A7DADC]/20"
-                      />
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button type="submit" className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90">
-                            <Send className="h-4 w-4 mr-2" />
-                            Post
-                          </Button>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={() => setShowPostForm(false)}
-                            className="border-[#A7DADC]/30"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                        {!user && (
-                          <span className="text-sm text-[#2d2d2d]/60">You need to log in to post</span>
-                        )}
-                      </div>
-                    </form>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Posts Feed */}
             <motion.div
@@ -666,7 +589,11 @@ export const Community = () => {
                       <h3 className="font-display text-xl text-[#2d2d2d] mb-2">No posts yet</h3>
                       <p className="text-[#2d2d2d]/70 mb-4">Be the first to share something amazing!</p>
                       <Button
-                        onClick={() => setShowPostForm(true)}
+                        onClick={() => {
+                          if (!user) { setShowLoginModal(true); return; }
+                          setShowCreateModal(true);
+                          setCreateStep(1);
+                        }}
                         className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90"
                       >
                         <Plus className="h-4 w-4 mr-2" />
