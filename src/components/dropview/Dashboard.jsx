@@ -23,6 +23,7 @@ import {
   User,
   LogOut,
   Menu,
+  Home,
 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { AuthContext } from '../../Context/AuthContext';
@@ -164,6 +165,14 @@ export function Dashboard() {
       className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-30"
     >
       <div className="px-4 py-4 space-y-3">
+        <Button 
+          onClick={() => { navigate('/'); setMobileMenuOpen(false); }}
+          variant="outline"
+          className="w-full justify-start border-[#A7DADC] text-[#2d2d2d] hover:bg-[#A7DADC]/10"
+        >
+          <Home className="mr-2 h-4 w-4" />
+          Home
+        </Button>
         <Button 
           onClick={() => { navigate('/community'); setMobileMenuOpen(false); }}
           variant="outline"
@@ -394,6 +403,14 @@ export function Dashboard() {
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-3">
+              <Button 
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="border-[#A7DADC] text-[#2d2d2d] hover:bg-[#A7DADC]/10 px-6 py-2 rounded-full transition-all duration-300"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Home
+              </Button>
               <Button 
                 onClick={() => navigate('/community')}
                 variant="outline"
