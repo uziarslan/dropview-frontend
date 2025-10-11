@@ -308,11 +308,11 @@ export function LandingPage() {
           </p>
 
           <Button 
-            onClick={() => navigate('/signup')}
+            onClick={() => navigate(user ? '/dashboard' : '/signup')}
             size="lg" 
             className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            Join a Drop Now
+            {user ? 'Go to Dashboard' : 'Join a Drop Now'}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
 
@@ -350,36 +350,46 @@ export function LandingPage() {
             How DropView Works
           </h2>
           <p className="text-lg text-[#2d2d2d]/70 max-w-2xl mx-auto">
-            A simple 3-step process to get free products and share your authentic experience
+            A simple 5-step journey to earn free products and share your authentic experience with brands that value your feedback
           </p>
         </motion.div>
 
-        <div className="relative">
-          {/* Connection Lines */}
-          <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] transform -translate-y-1/2 pointer-events-none" style={{ zIndex: 0 }} />
-          
-          <div className="grid md:grid-cols-3 gap-12 relative" style={{ zIndex: 1 }}>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {[
               {
                 step: "01",
-                title: "Sign up for drops",
-                description: "Create your profile and tell us about your preferences so we can match you with products you'll love.",
-                icon: <Users className="h-10 w-10" />,
+                title: "Signup",
+                description: "Create your profile and answer a few quick questions to help us understand your interests.",
+                icon: <Users className="h-8 w-8" />,
                 color: "from-blue-500 to-blue-600"
               },
               {
                 step: "02", 
-                title: "Receive free products",
-                description: "Get carefully selected products delivered to your door at no cost. Try them for as long as you need.",
-                icon: <Package className="h-10 w-10" />,
-                color: "from-purple-500 to-purple-600"
+                title: "Earn",
+                description: "Create your profile and answer a few quick questions to help us understand your interests.",
+                icon: <Star className="h-8 w-8" />,
+                color: "from-yellow-500 to-yellow-600"
               },
               {
                 step: "03",
-                title: "Drop your review",
-                description: "Share your honest experience through text or video review to be eligible for your next drop.",
-                icon: <MessageSquare className="h-10 w-10" />,
+                title: "Receive Products",
+                description: "Get free products delivered to your door to try and review.",
+                icon: <Package className="h-8 w-8" />,
+                color: "from-purple-500 to-purple-600"
+              },
+              {
+                step: "04",
+                title: "Give Reviews",
+                description: "Share your honest experience through detailed reviews.",
+                icon: <MessageSquare className="h-8 w-8" />,
                 color: "from-green-500 to-green-600"
+              },
+              {
+                step: "05",
+                title: "Get More Free Drops",
+                description: "Continue receiving more products as you share authentic feedback.",
+                icon: <Gift className="h-8 w-8" />,
+                color: "from-pink-500 to-pink-600"
               }
             ].map((item, index) => (
               <motion.div
@@ -387,20 +397,18 @@ export function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                className="text-center relative"
-                style={{ zIndex: 1 }}
+                className="text-center"
               >
-                <Card className="p-8 h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white relative" style={{ zIndex: 1 }}>
-                  <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-6 text-white shadow-lg`}>
+                <Card className="p-6 h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
+                  <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-4 text-white shadow-lg`}>
                     {item.icon}
                   </div>
-                  <div className="text-sm font-medium text-[#A7DADC] mb-2 tracking-wider">STEP {item.step}</div>
-                  <h3 className="font-display text-2xl text-[#2d2d2d] mb-4">{item.title}</h3>
-                  <p className="text-[#2d2d2d]/70 leading-relaxed">{item.description}</p>
+                  <div className="text-xs font-medium text-[#A7DADC] mb-2 tracking-wider">STEP {item.step}</div>
+                  <h3 className="font-display text-lg text-[#2d2d2d] mb-3">{item.title}</h3>
+                  <p className="text-[#2d2d2d]/70 text-sm leading-relaxed">{item.description}</p>
                 </Card>
               </motion.div>
             ))}
-          </div>
         </div>
       </section>
 
@@ -534,11 +542,11 @@ export function LandingPage() {
           </p>
           
           <Button 
-            onClick={() => navigate('/signup')}
+            onClick={() => navigate(user ? '/dashboard' : '/signup')}
             size="lg"
             className="bg-gradient-to-r from-[#FFD1DC] to-[#A7DADC] text-[#2d2d2d] hover:opacity-90 text-lg px-12 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            Join a Drop Now
+            {user ? 'Go to Dashboard' : 'Join a Drop Now'}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           

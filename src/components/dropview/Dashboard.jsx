@@ -28,6 +28,8 @@ import {
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { AuthContext } from '../../Context/AuthContext';
 import { referralService } from '../../services/referralService';
+import progressService from '../../services/progressService';
+import { Progress } from '../ui/progress';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -39,25 +41,30 @@ export function Dashboard() {
   const [referralData, setReferralData] = useState(null);
   const [shareLoading, setShareLoading] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
+  const [progressData, setProgressData] = useState(null);
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
 
-  // Fetch referral data
+  // Fetch referral data and progress data
   useEffect(() => {
-    const fetchReferralData = async () => {
+    const fetchData = async () => {
       try {
-        const data = await referralService.getReferralInfo();
-        setReferralData(data);
+        const [referralDataResult, progressDataResult] = await Promise.all([
+          referralService.getReferralInfo(),
+          progressService.getProgressData()
+        ]);
+        setReferralData(referralDataResult);
+        setProgressData(progressDataResult);
       } catch (error) {
-        console.error('Error fetching referral data:', error);
-        setShareMessage('Failed to load referral data. Please refresh the page.');
+        console.error('Error fetching data:', error);
+        setShareMessage('Failed to load data. Please refresh the page.');
       }
     };
 
     if (user) {
-      fetchReferralData();
+      fetchData();
     }
   }, [user]);
 
@@ -456,6 +463,175 @@ export function Dashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Progress to First Free Drop - TOP PRIORITY SECTION */}
+        {progressData && !progressData.firstDropUnlocked && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <Card className="overflow-hidden shadow-xl border-0 bg-gradient-to-br from-[#FFD1DC]/20 via-white to-[#A7DADC]/20">
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD1DC] to-[#A7DADC] rounded-full flex items-center justify-center shadow-lg">
+                    <Gift className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-display text-2xl text-[#2d2d2d]">
+                      Unlock Your First Free Drop
+                    </h2>
+                    <p className="text-sm text-[#2d2d2d]/70">
+                      Complete these milestones to get your first product
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-lg font-semibold text-[#2d2d2d]">
+                      {progressData.progress}% Complete
+                    </span>
+                    {progressData.progress >= 100 ? (
+                      <Badge className="bg-green-100 text-green-700 border-green-300">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Unlocked!
+                      </Badge>
+                    ) : (
+                      <span className="text-sm text-[#2d2d2d]/60">
+                        {(() => {
+                          const needed = [];
+                          if (progressData.milestones.invites.needed > 0) {
+                            needed.push(`${progressData.milestones.invites.needed} invite${progressData.milestones.invites.needed > 1 ? 's' : ''}`);
+                          }
+                          if (progressData.milestones.loginStreak.needed > 0) {
+                            needed.push(`${progressData.milestones.loginStreak.needed} login${progressData.milestones.loginStreak.needed > 1 ? 's' : ''}`);
+                          }
+                          if (progressData.milestones.communityActions.needed > 0) {
+                            needed.push(`${progressData.milestones.communityActions.needed} post${progressData.milestones.communityActions.needed > 1 ? 's' : ''}`);
+                          }
+                          
+                          if (needed.length === 0) return 'Complete!';
+                          if (needed.length === 1) return `${needed[0]} away!`;
+                          if (needed.length === 2) return `${needed[0]} & ${needed[1]} away!`;
+                          return `${needed[0]}, ${needed[1]} & ${needed[2]} away!`;
+                        })()}
+                      </span>
+                    )}
+                  </div>
+                  <Progress 
+                    value={progressData.progress} 
+                    className="h-3 bg-gray-200"
+                  />
+                </div>
+
+                {/* Milestones Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Invites Milestone */}
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    progressData.milestones.invites.completed 
+                      ? 'border-green-300 bg-green-50' 
+                      : 'border-[#A7DADC]/30 bg-white'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-full ${
+                        progressData.milestones.invites.completed 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-[#A7DADC]/20 text-[#A7DADC]'
+                      }`}>
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-[#2d2d2d] text-sm">
+                            10 Invites
+                          </h3>
+                          {progressData.milestones.invites.completed && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-[#2d2d2d]/60">
+                          {progressData.milestones.invites.current}/{progressData.milestones.invites.target} friends joined
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Login Streak Milestone */}
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    progressData.milestones.loginStreak.completed 
+                      ? 'border-green-300 bg-green-50' 
+                      : 'border-[#FFD1DC]/30 bg-white'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-full ${
+                        progressData.milestones.loginStreak.completed 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-[#FFD1DC]/20 text-[#FFD1DC]'
+                      }`}>
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-[#2d2d2d] text-sm">
+                            5 Day Streak 🔥
+                          </h3>
+                          {progressData.milestones.loginStreak.completed && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-[#2d2d2d]/60">
+                          {progressData.milestones.loginStreak.current}/{progressData.milestones.loginStreak.target} consecutive days
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Community Actions Milestone */}
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    progressData.milestones.communityActions.completed 
+                      ? 'border-green-300 bg-green-50' 
+                      : 'border-purple-300/30 bg-white'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-full ${
+                        progressData.milestones.communityActions.completed 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-purple-100 text-purple-500'
+                      }`}>
+                        <MessageSquare className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-[#2d2d2d] text-sm">
+                            3 Community Actions 💬
+                          </h3>
+                          {progressData.milestones.communityActions.completed && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-[#2d2d2d]/60">
+                          {progressData.milestones.communityActions.current}/{progressData.milestones.communityActions.target} posts created
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Call to Action */}
+                {progressData.progress < 100 && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800 text-center">
+                      💡 <strong>Tip:</strong> Share your referral link, login daily, and create posts in the community to unlock your first drop faster!
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Coming Soon Section - NEW TOP SECTION */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
